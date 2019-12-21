@@ -8,6 +8,7 @@ ERROR = "ERROR"
 SUCCESS_CODES = {UPDATED, CREATED}
 
 
+# ToDo: Avoid race conditions
 def upsert_blueprint_from_dict(dic):
     if "short_name" not in dic:
         return ERROR

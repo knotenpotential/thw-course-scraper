@@ -14,6 +14,8 @@ from django.views.decorators.http import require_http_methods
 def add_blueprint(request):
     try:
         # ToDo: Handling for bad requests
+        # ToDo API Key middleware
+        #print(request.META.get("HTTP_X_API_KEY", "NO KEY"))
         json_data = json.loads(request.body)
         created = upsert_blueprint_from_dict(json_data)
         return JsonResponse({

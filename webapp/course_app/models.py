@@ -42,6 +42,8 @@ class TrainingBlueprintModel(TimeStampMixin):
         self.goal = dic["goal"]
         self.content = dic["content"]
 
+    # ToDo: add validator for dict
+
 
 # Class for storing concrete training instances that are derived from the blueprint
 class TrainingDateModel(TimeStampMixin):
