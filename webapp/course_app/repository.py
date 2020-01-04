@@ -1,8 +1,7 @@
 from django.db import transaction
-import datetime
 
 from .models import TrainingBlueprintModel, LastMinuteSeatScrapeModel, LastMinuteSeatsModel, \
-    HistoricLastMinuteSeatsModel
+    HistoricLastMinuteSeatsModel, TrainingDateModel
 
 # Return codes
 OK = "OK"
@@ -12,24 +11,42 @@ SUCCESS_CODES = {OK}
 
 
 # ToDo: Avoid race conditions
-def upsert_blueprints_from_dict(json_data):
-    for dic in json_data:
+def upsert_blueprints_from_dict(json_arr):
+    for dic in json_arr:
+        # ToDo: do actual validations
         if "short_name" not in dic:
             return ERROR
         query_set = TrainingBlueprintModel.objects.filter(short_name=dic["short_name"])
-        if query_set:
-            record = query_set.first()
-            try:
+        try:
+            if query_set:
+                record = query_set.first()
                 record.update_by_dict(dic)
                 record.save()
-            except Exception:
-                return ERROR
-        else:
-            try:
+            else:
                 record = TrainingBlueprintModel.from_dict(dic)
                 record.save()
-            except Exception:
-                return ERROR
+        except Exception:
+            raise
+            return ERROR
+    return OK
+
+
+def upsert_training_dates_from_dict(json_arr):
+    for dic in json_arr:
+        # ToDo: validations for format
+        query_set = TrainingDateModel.objects.filter(training_short_name=dic["training_short_name"])
+        try:
+            if query_set:
+                record = query_set.first()
+                record.update_by_dict(dic)
+                record.save()
+            else:
+                record = TrainingDateModel.from_dict(dic)
+                record.save()
+        except Exception:
+            raise
+            return ERROR
+    return OK
 
 
 def add_new_last_minute_seat_scrape_from_dic(dic):
@@ -48,11 +65,12 @@ def add_new_last_minute_seat_scrape_from_dic(dic):
             last_minute_seat_training_name_to_record = {}
             for existing_last_minute_seat_record in LastMinuteSeatsModel.objects.all():
                 last_minute_seat_training_name_to_record[existing_last_minute_seat_record.training.pk] = \
-                    last_minute_seat_training_name_to_record
+                    existing_last_minute_seat_record
 
             # Iterate through all last minute seats fetched in the current scrape
             # and create records for them if they are different from the existing records (or no previous record exists)
             for last_minute_seat in dic["last_minute"]:
+                last_minute_seat["scrape_id"] = scrape
                 new_record = LastMinuteSeatsModel.from_dict(last_minute_seat)
 
                 # If we currently have a record for the same training in the database, we update it if necessary.
@@ -77,9 +95,13 @@ def add_new_last_minute_seat_scrape_from_dic(dic):
             for existing_last_minute_seat in last_minute_seat_training_name_to_record.values():
                 historic_record = HistoricLastMinuteSeatsModel.from_last_minute_seat(existing_last_minute_seat)
                 historic_record.save()
-                existing_last_minute_seat.scrape_id = scrape
-                existing_last_minute_seat.num_seats = 0
-                existing_last_minute_seat.save()
+                historic_record_with_zero_val = HistoricLastMinuteSeatsModel.from_last_minute_seat(
+                    existing_last_minute_seat)
+                historic_record_with_zero_val.scrape_id = scrape
+                historic_record_with_zero_val.num_seats = 0
+                historic_record_with_zero_val.scraped_at = scrape.scraped_at
+                historic_record_with_zero_val.save()
+                existing_last_minute_seat.delete()
     except Exception as err:
         raise err
         # ToDo: Cleanup
