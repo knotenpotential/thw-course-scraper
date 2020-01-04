@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+
+from datetime import datetime
 import scrapy
 
 
 class BlueprintsSpider(scrapy.Spider):
     name = "blueprints"
 
-    start_urls = ['https://www.thw-ausbildungszentrum.de/THW-BuS/DE/Ausbildungsangebot/Lehrgangskatalog/lehrgangskatalog_node.html']
+    start_urls = [
+        'https://www.thw-ausbildungszentrum.de/THW-BuS/DE/Ausbildungsangebot/Lehrgangskatalog/lehrgangskatalog_node.html'
+    ]
 
     def parse(self, response):
         BLUEPRINT_SELECTOR = 'table.courses > tbody > tr > td:last-child > a::attr(href)'
@@ -24,4 +29,6 @@ class BlueprintsSpider(scrapy.Spider):
             'short_name': extract_with_css('div#main span.metadata::text'),
             'long_name': extract_with_css('div#main h1.isFirstInSlot::text'),
             'complete_name': extract_with_css('div#main h1.isFirstInSlot + h2 + p::text'),
+            'content': None,
+            'scraped_ts': datetime.now().timestamp(),
         }

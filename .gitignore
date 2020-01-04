@@ -132,3 +132,4 @@ dmypy.json
 .idea/*
 .vscode/*
 webapp/course_app/migrations/*
+scraper/*.json
