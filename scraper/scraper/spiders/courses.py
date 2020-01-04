@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+import arrow
 import re
 import scrapy
 
@@ -27,16 +27,25 @@ class CoursesSpider(scrapy.Spider):
                 if match is not None:
                     return int(match.group('num_seats'))
 
+            def get_datetime(sentence):
+                # example: Fr. 17.01.2020, 12:50 Uhr
+                return arrow.get(sentence, 'DD.MM.YYYY, HH:mm', tzinfo='Europe/Berlin').isoformat()
+
+            def get_date(sentence):
+                if sentence:
+                    return arrow.get(sentence, 'DD.MM.YYYY', tzinfo='Europe/Berlin').date().isoformat()
+
             yield {
                 'course_number': extract_with_css('span.metadata::text'),
                 'complete_name': extract_with_css('h2 > a::text'),
-                'start': extract_with_css('dl.docData dd:first-of-type::text'),
-                'end': extract_with_css('dl.docData dd:last-of-type::text'),
-                'registration_period': extract_with_css('dl.courseAction dd::text') or None,
+                'start': get_datetime(extract_with_css('dl.docData dd:first-of-type::text')),
+                'end': get_datetime(extract_with_css('dl.docData dd:last-of-type::text')),
+                'registration_period': get_date(extract_with_css('dl.courseAction dd::text')) or None,
                 'last_minute_seats': get_last_minute_seats(extract_with_css('p.courseAction a::text')),
-                'scraped_ts': datetime.now().timestamp(),
+                'scraped_ts': arrow.now().isoformat(),
             }
 
         # next_page = response.css(NEXT_PAGE_SELECTOR).get()
+
         # if next_page is not None:
         #     yield response.follow(next_page, callback=self.parse)

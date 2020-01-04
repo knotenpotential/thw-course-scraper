@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+import arrow
 import re
 import scrapy
 
@@ -17,6 +17,8 @@ class LastMinuteCoursesSpider(scrapy.Spider):
         NEXT_PAGE_SELECTOR = 'li.forward a.forward::attr(href)'
         SHORT_NAME_RE = r'^Standort \D+ [-|–] (?P<short_name>[H|N] \d{3}[a-zA-Z]?/\d{2})$'
         LAST_MINUTE_RE = r'^Noch (?P<num_seats>\d+) Last-Minute-Plätze verfügbar$'
+        hyperlink_re = re.compile(r'')
+        HYPERLINK_RE_REPL = r'\1\3'
 
         for course in response.css(COURSE_SELECTOR):
             def extract_with_css(query):
@@ -34,16 +36,20 @@ class LastMinuteCoursesSpider(scrapy.Spider):
                 if match is not None:
                     return int(match.group('num_seats'))
 
+            def get_hyperlink(sentence):
+               return sentence
+
             if course.css('p.courseAction a::text').get() is not None:
                 yield {
                     'short_name': get_short_name(extract_with_css('span.metadata::text')),
                     'num_seats': get_last_minute_seats(extract_with_css('p.courseAction a::text')),
-                    'hyperlink': response.urljoin(extract_with_css('p.courseAction a::attr(href)')),
-                    'scraped_ts': datetime.now().timestamp(),
+                    'hyperlink': get_hyperlink(extract_with_css('p.courseAction a::attr(href)')),
+                    'scraped_ts': arrow.now().isoformat(),
                 }
             else:
                 return
 
         next_page = response.css(NEXT_PAGE_SELECTOR).get()
+
         if next_page is not None:
             yield response.follow(next_page, callback=self.parse)

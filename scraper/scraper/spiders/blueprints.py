@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+import arrow
 import scrapy
 
 
@@ -30,5 +30,5 @@ class BlueprintsSpider(scrapy.Spider):
             'long_name': extract_with_css('div#main h1.isFirstInSlot::text'),
             'complete_name': extract_with_css('div#main h1.isFirstInSlot + h2 + p::text'),
             'content': None,
-            'scraped_ts': datetime.now().timestamp(),
+            'scraped_ts': arrow.now().isoformat(),
         }
