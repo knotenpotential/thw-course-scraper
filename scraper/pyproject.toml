@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "scraper"
+version = "0.1.0"
+description = "A scraper for THW courses"
+authors = ["knotenpotential <32957280+knotenpotential@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+requests = "^2.22.0"
+arrow = "^0.15.5"
+scrapy = "^1.8.0"
+python-dotenv = "^0.10.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
