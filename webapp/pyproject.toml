@@ -8,6 +8,7 @@ authors = ["DominikSudwischer"]
 python = "^3.6"
 django = "^3.0.2"
 arrow = "^0.15.6"
+cachetools = "^4.1.0"
 
 [tool.poetry.dev-dependencies]
 

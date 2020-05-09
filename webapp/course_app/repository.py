@@ -1,3 +1,8 @@
+from functools import partial
+
+import cachetools
+from cachetools.keys import hashkey
+from course_app.cache import cache_lock, cache
 from django.db import transaction
 
 from .models import TrainingBlueprintModel, LastMinuteSeatScrapeModel, LastMinuteSeatsModel, \
@@ -109,5 +114,7 @@ def add_new_last_minute_seat_scrape_from_dic(dic):
     return OK
 
 
+@cachetools.cached(cache, key=partial(hashkey, "get_training_blueprints"), lock=cache_lock)
 def get_all_blueprints():
+    print("non cached")
     return TrainingBlueprintModel.get_all()
