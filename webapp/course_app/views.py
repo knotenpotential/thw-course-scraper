@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .repository import upsert_blueprints_from_dict, SUCCESS_CODES, add_new_last_minute_seat_scrape_from_dic,\
-    upsert_training_dates_from_dict
+from .repository import upsert_blueprints_from_dict, SUCCESS_CODES, add_new_last_minute_seat_scrape_from_dic, \
+    upsert_training_dates_from_dict, get_all_blueprints
 from .api_util import require_api_key
 
 # Create your views here.
@@ -63,3 +63,9 @@ def add_scrape(request):
         "success": created in SUCCESS_CODES,
         "created": created
     })
+
+
+@require_http_methods(["GET"])
+def get_training_blueprints(request):
+    blueprints = get_all_blueprints()
+    return JsonResponse({"blueprints": [blueprint.to_json() for blueprint in blueprints]})

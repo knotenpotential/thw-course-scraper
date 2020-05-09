@@ -44,7 +44,19 @@ class TrainingBlueprintModel(TimeStampMixin):
     def get_by_short_name(short_name):
         return TrainingBlueprintModel.objects.get(short_name=short_name)
 
-    # ToDo: add validator for dict
+    @staticmethod
+    def get_all():
+        return TrainingBlueprintModel.objects.all()
+
+    def to_dict(self):
+        return {
+            "short_name": self.short_name,
+            "long_name": self.long_name,
+            "complete_name": self.complete_name,
+            "content": self.content
+        }
+
+        # ToDo: add validator for dict
 
 
 # Class for storing concrete training instances that are derived from the blueprint
@@ -135,4 +147,5 @@ class HistoricLastMinuteSeatsModel(TimeStampMixin):
     @staticmethod
     def from_last_minute_seat(last_minute_seat):
         return HistoricLastMinuteSeatsModel(training=last_minute_seat.training, scrape_id=last_minute_seat.scrape_id,
-                                            num_seats=last_minute_seat.num_seats, scraped_at=last_minute_seat.scraped_at)
+                                            num_seats=last_minute_seat.num_seats,
+                                            scraped_at=last_minute_seat.scraped_at)

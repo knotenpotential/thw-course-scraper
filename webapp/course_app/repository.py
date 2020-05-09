@@ -107,3 +107,7 @@ def add_new_last_minute_seat_scrape_from_dic(dic):
         # ToDo: Cleanup
         return ERROR
     return OK
+
+
+def get_all_blueprints():
+    return TrainingBlueprintModel.get_all()
